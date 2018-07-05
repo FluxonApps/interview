@@ -1,24 +1,15 @@
-import http from 'http'
+import Koa from 'koa'
+import bodyParser from 'koa-bodyparser'
 
-//create a server object:
-http.createServer(function (req, res) {
-  if (req.method == 'POST') {
-      var body = ''
-      req.on('data', function (data) {
-          body += data
-          // 1e6 === 1 * Math.pow(10, 6) === 1 * 1000000 ~~~ 1MB
-          if (body.length > 1e6) { 
-              // FLOOD ATTACK OR FAULTY CLIENT, NUKE REQUEST
-              req.connection.destroy()
-          }
-      })
-      req.on('end', function () {
+var app = new Koa();
+app.use(bodyParser());
 
-          var POST = JSON.parse(body)
-          // use POST
-          console.log(POST)
-          res.write(JSON.stringify(POST)) //write a response to the client
-          res.end() //end the response
-      })
-  }
-}).listen(8080) //the server object listens on port 8080
+app.use(async ctx => {
+  // the parsed body will store in ctx.request.body
+  // if nothing was parsed, body will be an empty object {}
+  var json_obj = ctx.request.body
+  console.log('Got json object: \n', json_obj)
+  ctx.body = json_obj;
+});
+
+app.listen(8080) //the server object listens on port 8080
